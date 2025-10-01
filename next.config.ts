@@ -1,6 +1,5 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Removed deprecated experimental.appDir as App Router is default in Next.js 15
-}
+import type { NextConfig } from 'next'
 
-module.exports = nextConfig
+const config: NextConfig = {}
+
+export default config
