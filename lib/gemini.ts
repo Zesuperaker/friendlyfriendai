@@ -15,6 +15,7 @@ export interface Prompt {
     monitor?: (model: Model) => void;
     expectedInputs?: ExpectedInput[];
     expectedOutputs?: ExpectedOutput[];
+    outputLanguage?: string;
   }
 
   export interface ExpectedInput {
@@ -40,11 +41,11 @@ export interface Prompt {
     signal?: AbortSignal;
   }
 
-  interface ModelEvent extends Event {
+  export interface ModelEvent extends Event {
     loaded: number;
   }
 
-  interface Model extends EventTarget {
+  export interface Model {
     addEventListener(type: 'downloadprogress', listener: (e: ModelEvent) => void): void;
   }
 
@@ -84,8 +85,7 @@ export interface Prompt {
       if (!languageModel || typeof languageModel.availability !== 'function') {
         return 'unavailable';
       }
-      const avail = await languageModel.availability();
-      return avail;
+      return await languageModel.availability();
     } catch (error) {
       console.error('Availability check failed:', error);
       return 'unavailable';
@@ -116,6 +116,7 @@ export interface Prompt {
     try {
       const params = await getParams();
       const fullOptions: CreateOptions = {
+        outputLanguage: 'en',
         initialPrompts: [
           {
             role: 'system',
