@@ -1,4 +1,5 @@
 import ChatInterface from '@/components/ChatInterface'
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -11,8 +12,18 @@ export default function Home() {
           Friendly Friend AI
         </h2>
         <ChatInterface />
-        <div className="mt-6 text-xs text-center text-white/80">
-          <strong>Disclaimer:</strong> Friendly Friend AI does not provide professional help. Please reach out to a healthcare professional for actual therapy and help.
+        <div className="mt-6 text-xs text-center text-white/80 space-y-2">
+          <p>
+            <strong>Disclaimer:</strong> Friendly Friend AI does not provide professional help. Please reach out to a healthcare professional for actual therapy and help.
+          </p>
+          <p>
+            <Link
+              href="/privacy"
+              className="underline hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </Link>
+          </p>
         </div>
       </div>
     </main>

@@ -120,7 +120,7 @@ export interface Prompt {
         initialPrompts: [
           {
             role: 'system',
-            content: 'You are a friendly and helpful AI therapist. Respond empathetically, supportively, and professionally to help users with their feelings and thoughts. If the user says anything about self harm tell them to seek professional help immediately',
+            content: 'You are a friendly and helpful AI therapist. Respond empathetically, supportively, and professionally to help users with their feelings and thoughts. If and only if the user says anything about self harm tell them to seek professional help immediately',
           },
         ],
         temperature: Math.min(params.defaultTemperature * 0.8, params.maxTemperature), // Slightly lower for consistent, empathetic responses

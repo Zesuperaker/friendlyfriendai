@@ -16,7 +16,7 @@ To use Friendly Friend AI follow these steps
     });
   },
 });``
-6. You can then visit https://friendlyfriendai.com to chat with Friendly Friend AI, or you can clone this repo to run the Friendly Friend code locally.
+6. You can then visit https://friendlyfriendai.org to chat with Friendly Friend AI, or you can clone this repo to run the Friendly Friend code locally.
 
 If you enjoy Friendly Friend AI and want to help improve it we appreciate PRs :)
 Friendly Friend AI is realised under an MIT licence so if you have any creative ideas feel free to make your own variation of Friendly Friend.
