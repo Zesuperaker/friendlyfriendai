@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: 'Friendly Friend AI',
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 min-h-screen">
         {children}
+      <Analytics />
       </body>
     </html>
   )
