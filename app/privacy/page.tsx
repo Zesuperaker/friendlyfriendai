@@ -16,24 +16,24 @@ export default function PrivacyPage() {
           <p className="text-white/80 text-sm">Last Updated: October 2025</p>
 
           <section>
-            <h2 className="text-2xl font-bold mb-3">We Don't Collect Your Data</h2>
+            <h2 className="text-2xl font-bold mb-3">We Don&#39;t Collect Your Data</h2>
             <p className="text-white/90">
-              Your conversations happen entirely in your browser using Google's Gemini Nano AI.
+              Your conversations happen entirely in your browser using Google&#39;s Gemini Nano AI.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold mb-3">Where Your Data Lives</h2>
             <ul className="list-disc list-inside space-y-2 text-white/90">
-              <li>Your chat history is stored only in your browser's local storage</li>
-              <li>You can delete it anytime with the "New Chat" button</li>
+              <li>Your chat history is stored only in your browser&#39;s local storage</li>
+              <li>You can delete it anytime with the New Chat button</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold mb-3">Third Parties</h2>
             <ul className="list-disc list-inside space-y-2 text-white/90">
-              <li><strong>Vercel:</strong> May collect basic web analytics (page views, general location)</li>
+              <li><strong>Vercel:</strong> Collects basic web analytics (page views, general location)</li>
               <li><strong>Google Gemini Nano:</strong> Runs locally in your Chrome browser</li>
             </ul>
           </section>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
           <div className="mt-8 p-4 bg-white/10 rounded-lg border border-white/20">
             <p className="font-bold">TL;DR:</p>
             <p className="text-white/90 mt-1">
-              Everything happens on your device. We don't collect, store, or see your conversation data and for extra privacy you can run this websites code locally by pulling it from our github repo.
+              Everything happens on your device. We do not collect, store, or see your conversation data and for extra privacy you can run this websites code locally by pulling it from our github repo.
             </p>
           </div>
         </article>
