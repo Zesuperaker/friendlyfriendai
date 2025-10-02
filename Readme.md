@@ -1,7 +1,7 @@
 Welcome to Friendly Friend AI. 
 
 Friendly Friend is your private AI friend. This uses google's gemini nano prompt AI, this is a fully client side AI so all your conversations stay on your device and are never sent to anyone.
-The AI being client side also means it is completely free. 
+The AI being client side also means it is completely free. Friendly Friend AI only works on chrome.
 
 To use Friendly Friend AI follow these steps
 1. Open a new tab and go to: chrome://flags

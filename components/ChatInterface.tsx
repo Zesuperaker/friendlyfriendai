@@ -108,7 +108,14 @@ export default function ChatInterface() {
   if (!session) {
     return (
       <div className="flex flex-col h-96 items-center justify-center">
-        <div className="text-white text-lg">Failed to initialize AI. Please refresh the page.</div>
+        <div className="text-white text-lg">Failed to initialize AI. Please refresh the page. If this problem persists or you have not yet set up the google nano AI please follow the instructions on <a
+                href="https://github.com/Zesuperaker/friendlyfriendai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                GitHub
+              </a>.</div>
       </div>
     )
   }
@@ -147,7 +154,7 @@ export default function ChatInterface() {
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-white/70">
-              <p className="text-lg mb-2">👋 Hi! I'm Friendly Friend AI</p>
+              <p className="text-lg mb-2">👋 Hi! I&#39;m Friendly Friend AI</p>
               <p className="text-sm">Send a message to start chatting</p>
             </div>
           </div>
