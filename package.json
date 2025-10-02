@@ -11,11 +11,13 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-slot": "^1.1.0",
+    "autoprefixer": "10.4.20",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "11.15.0",
     "lucide-react": "^0.460.0",
-    "next": "15.1.0",
+    "next": "^15.5.4",
+    "postcss": "8.4.47",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hook-form": "^7.53.2",
@@ -24,9 +26,7 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8",
-    "autoprefixer": "10.4.20",
-    "postcss": "8.4.47"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "22.7.4",
