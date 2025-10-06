@@ -121,7 +121,7 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-[600px]">
+    <div className="flex flex-col h-[500px]">
       {/* Header with New Chat button */}
       {messages.length > 0 && (
         <div className="flex justify-end p-2 border-b border-white/20">
