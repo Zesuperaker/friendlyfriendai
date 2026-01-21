@@ -11,29 +11,52 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
-  const [isInitializing, setIsInitializing] = useState(true)
+  const [isInitializing, setIsInitializing] = useState(false)
+  const [sessionReady, setSessionReady] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Initialize the Gemini session when component mounts
+  // Load saved messages on mount
   useEffect(() => {
-    const initSession = async () => {
-      try {
-        const newSession = await createGeminiSession()
-        if (newSession) {
-          setSession(newSession)
-          console.log('Gemini session created successfully')
-        } else {
-          console.error('Failed to create Gemini session')
-        }
-      } catch (error) {
-        console.error('Error initializing Gemini session:', error)
-      } finally {
-        setIsInitializing(false)
-      }
+    const savedMessages = localStorage.getItem('chatMessages')
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages))
     }
-
-    initSession()
   }, [])
+
+  // Initialize the Gemini session when user clicks button (USER GESTURE)
+  const handleInitializeSession = async () => {
+    setIsInitializing(true)
+    setDownloadProgress(0)
+    try {
+      const newSession = await createGeminiSession({
+        monitor(m) {
+          m.addEventListener('downloadprogress', (e) => {
+            const progress = Math.round((e.loaded * 100) / (1024 * 1024 * 22)) // Estimate based on ~22MB model
+            setDownloadProgress(Math.min(progress, 99)) // Cap at 99% until complete
+            console.log(`Downloaded ${progress}%`)
+          })
+        },
+      })
+      if (newSession) {
+        setSession(newSession)
+        setSessionReady(true)
+        setDownloadProgress(100)
+        console.log('✅ Gemini session created successfully')
+      } else {
+        console.error('Failed to create Gemini session')
+      }
+    } catch (error) {
+      console.error('Error initializing Gemini session:', error)
+      if (error instanceof DOMException) {
+        if (error.name === 'NotAllowedError') {
+          console.error('User gesture required - please click the Initialize button')
+        }
+      }
+    } finally {
+      setIsInitializing(false)
+    }
+  }
 
   useEffect(() => {
     const savedMessages = localStorage.getItem('chatMessages')
@@ -64,7 +87,7 @@ export default function ChatInterface() {
     if (!session) {
       const errorMessage: Message = {
         id: Date.now().toString(),
-        content: 'AI session not initialized. Please refresh the page.',
+        content: 'AI session not initialized. Please click the Initialize button first.',
         role: 'assistant'
       }
       setMessages(prev => [...prev, errorMessage])
@@ -76,7 +99,6 @@ export default function ChatInterface() {
     setIsTyping(true)
 
     try {
-      // Use the Gemini LanguageModel API
       const response = await promptSession(session, content)
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -97,31 +119,82 @@ export default function ChatInterface() {
     }
   }
 
-  if (isInitializing) {
+  // Show initialization screen if session not ready
+  if (!sessionReady) {
     return (
-      <div className="flex flex-col h-96 items-center justify-center">
-        <div className="text-white text-lg">Initializing AI...</div>
-      </div>
-    )
-  }
+      <div className="flex flex-col h-[600px] items-center justify-center p-6">
+        <div className="text-center space-y-6 max-w-md">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl font-bold text-white mb-2">👋 Friendly Friend AI</h2>
+            <p className="text-white/60">Your private AI companion</p>
+          </motion.div>
 
-  if (!session) {
-    return (
-      <div className="flex flex-col h-96 items-center justify-center">
-        <div className="text-white text-lg">Failed to initialize AI. Please refresh the page. If this problem persists or you have not yet set up the google nano AI please follow the instructions on <a
-                href="https://github.com/Zesuperaker/friendlyfriendai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-white"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 space-y-4"
+          >
+            <p className="text-white/80 text-sm leading-relaxed">
+              Click below to download and initialize the google prompt AI model on your device.
+            </p>
+
+            {isInitializing && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-3"
               >
-                GitHub
-              </a>.</div>
+                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${downloadProgress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+                <p className="text-sm text-white/70 font-medium">{downloadProgress}% downloaded...</p>
+              </motion.div>
+            )}
+
+            <motion.button
+              onClick={handleInitializeSession}
+              disabled={isInitializing}
+              whileHover={!isInitializing ? { scale: 1.02 } : {}}
+              whileTap={!isInitializing ? { scale: 0.98 } : {}}
+              className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${
+                isInitializing
+                  ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+              }`}
+            >
+              {isInitializing ? 'Downloading...' : 'Initialize AI'}
+            </motion.button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-xs text-white/50 space-y-2"
+          >
+            <p className="font-semibold text-white/60">Requirements:</p>
+            <ul className="space-y-1 text-left">
+              <li>✓ Chrome with experimental AI enabled</li>
+              <li>✓ 22GB free storage</li>
+            </ul>
+          </motion.div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-[500px]">
+    <div className="flex flex-col h-[600px]">
       {/* Header with New Chat button */}
       {messages.length > 0 && (
         <div className="flex justify-end p-2 border-b border-white/20">
@@ -154,7 +227,7 @@ export default function ChatInterface() {
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-white/70">
-              <p className="text-lg mb-2">👋 Hi! I&#39;m Friendly Friend AI</p>
+              <p className="text-lg mb-2">👋 Hi! I&apos;m Friendly Friend AI</p>
               <p className="text-sm">Send a message to start chatting</p>
             </div>
           </div>
