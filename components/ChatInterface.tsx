@@ -238,7 +238,7 @@ export default function ChatInterface() {
                 </a>
               </li>
               <li>✓ 22GB free storage</li>
-              <li>✓ Stable internet connection</li>
+              <li>✓ Accessing friendly friend on chrome on a pc</li>
             </ul>
           </motion.div>
         </div>
