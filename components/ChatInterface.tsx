@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import MessageBubble from './MessageBubble'
 import InputArea from './InputArea'
 import { Message } from '@/lib/types'
-import { createGeminiSession, promptSession, type Session } from '@/lib/gemini'
+import { createGeminiSession, promptSession, checkAvailability, type Session } from '@/lib/gemini'
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -14,6 +14,7 @@ export default function ChatInterface() {
   const [isInitializing, setIsInitializing] = useState(false)
   const [sessionReady, setSessionReady] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const [modelStatus, setModelStatus] = useState<'unknown' | 'unavailable' | 'downloading' | 'downloadable' | 'ready'>('unknown')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Load saved messages on mount
@@ -22,37 +23,68 @@ export default function ChatInterface() {
     if (savedMessages) {
       setMessages(JSON.parse(savedMessages))
     }
+    // Check initial availability
+    checkInitialAvailability()
   }, [])
+
+  // Check if model is already available
+  const checkInitialAvailability = async () => {
+    try {
+      const availability = await checkAvailability()
+      setModelStatus(availability === 'unavailable' ? 'unavailable' : availability)
+    } catch (error) {
+      console.error('Failed to check availability:', error)
+      setModelStatus('unavailable')
+    }
+  }
 
   // Initialize the Gemini session when user clicks button (USER GESTURE)
   const handleInitializeSession = async () => {
     setIsInitializing(true)
     setDownloadProgress(0)
+
     try {
+      // Check current availability
+      const availability = await checkAvailability()
+      console.log('Current model availability:', availability)
+
+      if (availability === 'unavailable') {
+        setModelStatus('unavailable')
+        console.error('Model is unavailable on this device')
+        return
+      }
+
+      // Create session with download monitoring
       const newSession = await createGeminiSession({
         monitor(m) {
+          setModelStatus('downloading')
           m.addEventListener('downloadprogress', (e) => {
-            const progress = Math.round((e.loaded * 100) / (1024 * 1024 * 22)) // Estimate based on ~22MB model
-            setDownloadProgress(Math.min(progress, 99)) // Cap at 99% until complete
-            console.log(`Downloaded ${progress}%`)
+            const estimatedTotal = 1024 * 1024 * 22 // ~22MB
+            const progress = Math.round((e.loaded * 100) / estimatedTotal)
+            setDownloadProgress(Math.min(progress, 99))
+            console.log(`Model download progress: ${progress}%`)
           })
         },
       })
+
       if (newSession) {
         setSession(newSession)
         setSessionReady(true)
+        setModelStatus('ready')
         setDownloadProgress(100)
-        console.log('✅ Gemini session created successfully')
+        console.log('✅ Gemini session created and ready')
       } else {
         console.error('Failed to create Gemini session')
+        setModelStatus('unavailable')
       }
     } catch (error) {
       console.error('Error initializing Gemini session:', error)
       if (error instanceof DOMException) {
         if (error.name === 'NotAllowedError') {
-          console.error('User gesture required - please click the Initialize button')
+          console.error('❌ User gesture required - button click should have provided it')
         }
       }
+      setModelStatus('unavailable')
     } finally {
       setIsInitializing(false)
     }
@@ -140,7 +172,9 @@ export default function ChatInterface() {
             className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 space-y-4"
           >
             <p className="text-white/80 text-sm leading-relaxed">
-              Click below to download and initialize the google prompt AI model on your device.
+              {modelStatus === 'downloadable' || modelStatus === 'unknown'
+                ? 'Click below to download the AI model to your device. This is a one-time download of approximately 22MB and stays completely private.'
+                : 'Initializing your private AI companion...'}
             </p>
 
             {isInitializing && (
@@ -157,22 +191,30 @@ export default function ChatInterface() {
                     transition={{ duration: 0.3 }}
                   />
                 </div>
-                <p className="text-sm text-white/70 font-medium">{downloadProgress}% downloaded...</p>
+                <p className="text-sm text-white/70 font-medium">
+                  {modelStatus === 'downloading'
+                    ? `Downloading model: ${downloadProgress}%`
+                    : `Initializing: ${downloadProgress}%`}
+                </p>
               </motion.div>
             )}
 
             <motion.button
               onClick={handleInitializeSession}
-              disabled={isInitializing}
-              whileHover={!isInitializing ? { scale: 1.02 } : {}}
-              whileTap={!isInitializing ? { scale: 0.98 } : {}}
+              disabled={isInitializing || modelStatus === 'unavailable'}
+              whileHover={!isInitializing && modelStatus !== 'unavailable' ? { scale: 1.02 } : {}}
+              whileTap={!isInitializing && modelStatus !== 'unavailable' ? { scale: 0.98 } : {}}
               className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${
-                isInitializing
+                isInitializing || modelStatus === 'unavailable'
                   ? 'bg-white/10 text-white/50 cursor-not-allowed'
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
               }`}
             >
-              {isInitializing ? 'Downloading...' : 'Initialize AI'}
+              {modelStatus === 'unavailable'
+                ? 'Model Not Available'
+                : isInitializing
+                ? 'Please Wait...'
+                : 'Download or Initialize'}
             </motion.button>
           </motion.div>
 
@@ -184,8 +226,19 @@ export default function ChatInterface() {
           >
             <p className="font-semibold text-white/60">Requirements:</p>
             <ul className="space-y-1 text-left">
-              <li>✓ Chrome with experimental AI enabled</li>
+              <li className="flex items-center justify-between">
+                <span>✓ Chrome with experimental AI enabled</span>
+                <a
+                  href="https://github.com/Zesuperaker/friendlyfriendai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-400 hover:text-pink-400 transition-colors underline ml-2 whitespace-nowrap"
+                >
+                  see instructions
+                </a>
+              </li>
               <li>✓ 22GB free storage</li>
+              <li>✓ Stable internet connection</li>
             </ul>
           </motion.div>
         </div>
